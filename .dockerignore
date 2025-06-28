@@ -1,0 +1,16 @@
+node_modules
+.git
+.gitignore
+Dockerfile
+README.md
+package-lock.json
+npm-debug.log
+yarn-error.log
+yarn.lock
+.vscode
+.idea
+*.log
+*.env
+*.DS_Store
+*.swp
+*.swo

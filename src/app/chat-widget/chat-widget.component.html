@@ -1,0 +1,104 @@
+<div class="chat-container">
+    <!-- <div class="chat-modal-header">
+      <img src="/assets/just-logo.png" alt="Logo" class="logo" />
+      <span>Agent TalkVera</span>
+      <button class="close-button" >
+        <img src="/assets/close-icon.png" alt="Close" class="close-icon" />
+      </button>
+    </div> -->
+
+    <div class="chat-messages" #chatScroll>
+      <ng-container *ngFor="let message of _arrayModelFilteredMessage; let i = index">
+        <div class="message"
+          [ngClass]="{'user-message': message.sender === _enumSender.User, 'agent-message': message.sender === _enumSender.Chatbot}">
+
+          <img *ngIf="message.sender === _enumSender.User" src="/assets/user.png" alt="User Avatar"
+            class="message-avatar" />
+          <img *ngIf="message.sender === _enumSender.Chatbot" src="/assets/agent.png" alt="Agent Avatar"
+            class="message-avatar" />
+
+          <div class="message-bubble-wrapper">
+            <div class="message-content"
+              [ngClass]="{'message-content-user': message.sender === _enumSender.User, 'message-content-agent': message.sender === _enumSender.Chatbot}">
+
+              <ng-container *ngIf="message.isVoiceNote && message.audioUrl">
+                <div class="voice-note-player">
+                  <audio controls [src]="getSafeUrl(message.audioUrl)" preload="metadata"></audio>
+                  <div class="voice-note-info">
+                    <span *ngIf="message.audioDuration" class="voice-note-duration">{{ message.audioDuration }}</span>
+                  </div>
+                </div>
+                <span *ngIf="message.message" class="message-caption">{{ message.message }}</span>
+              </ng-container>
+
+              <ng-container *ngIf="message.fileUrl && !message.isVoiceNote">
+                <div class="file-attachment">
+                  <ng-container *ngIf="message.fileType?.startsWith('image/')">
+                    <img [src]="getSafeUrl(message.fileUrl)" [alt]="message.fileName || 'Image'" class="attached-image"
+                      (click)="previewImage(message.fileUrl)" />
+                  </ng-container>
+                  <ng-container *ngIf="!message.fileType?.startsWith('image/')">
+                    <a [href]="getSafeUrl(message.fileUrl)" target="_blank" download="{{message.fileName}}"
+                      class="attached-file-link">
+                      <img src="/assets/document.png" alt="Document Icon" class="file-icon" />
+                      <span>{{ message.fileName || 'Document' }}</span>
+                    </a>
+                  </ng-container>
+                </div>
+                <span *ngIf="message.message" class="message-caption">{{ message.message }}</span>
+              </ng-container>
+
+              <span *ngIf="message.message && !message.isVoiceNote && !message.fileUrl">{{ message.message }}</span>
+              <span
+                *ngIf="(message.isVoiceNote && !message.audioUrl && message.message) || (!message.isVoiceNote && !message.fileUrl && message.fileName && message.message && message.message.startsWith('Uploading'))">{{
+                message.message }}</span>
+
+            </div>
+
+            <div class="message-time"
+              [ngClass]="{'user': message.sender === _enumSender.User, 'agent': message.sender === _enumSender.Chatbot}">
+              <span>{{ message.time | date:'HH:mm' }}</span>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+
+      <div *ngIf="(chatCoreService.isLoadingSending$ | async) && !isRecording" class="typing-indicator">
+        <span></span><span></span><span></span>
+      </div>
+      <div *ngIf="isRecording" class="recording-indicator">
+        <img src="/assets/mic-active.png" alt="Recording..." class="recording-icon-active" />
+        <span>Recording... {{ formatRecordingTime(recordingTime) }}</span>
+      </div>
+    </div>
+
+    <div class="chat-input">
+      <button (click)="onUploadFileClick()" class="upload-button" title="Attach file" [disabled]="isRecording">
+        <img src="/assets/attach-file.png" alt="Upload" class="upload-icon" />
+      </button>
+      <input type="file" #fileInput (change)="onFileSelected($event)" style="display: none;" />
+
+      <input #userInput type="text" placeholder="{{ isRecording ? 'Recording voice note...' : 'Type your message...' }}"
+        [(ngModel)]="currentMessageText" (keydown.enter)="sendMessageOrStopRecording()" [disabled]="isRecording" />
+
+      <button *ngIf="!currentMessageText.trim() && !isRecording" (click)="toggleRecording()" class="record-button"
+        title="Record Voice Note">
+        <img src="/assets/mic-icon.png" alt="Record" class="record-icon" />
+      </button>
+
+      <button *ngIf="isRecording" (click)="stopRecordingAndSend()" class="record-button"
+        title="Stop and Send Recording">
+        <img src="/assets/stop-icon.png" alt="Stop" class="record-icon recording" />
+      </button>
+
+      <button *ngIf="currentMessageText.trim() && !isRecording" (click)="sendMessage()" class="send-button"
+        title="Send message">
+        <img src="/assets/send-blue.png" alt="Send" class="send-logo" />
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="previewImageUrl" class="image-preview-modal" (click)="closeImagePreview()">
+    <span class="close-preview-btn">&times;</span>
+    <img [src]="getSafeUrl(previewImageUrl)" alt="Preview" class="preview-image-content" />
+  </div>

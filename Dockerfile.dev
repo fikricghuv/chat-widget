@@ -1,0 +1,28 @@
+# Dockerfile.dev
+FROM node:20-alpine
+
+# Disable Angular analytics via ENV (first layer of defense)
+ENV NG_CLI_ANALYTICS=disabled
+
+# Set working directory inside the container
+WORKDIR /app
+
+# Copy package.json and package-lock.json
+COPY package*.json ./
+
+# Install dependencies
+RUN npm install
+
+# Explicitly disable Angular CLI analytics globally within the container's environment
+# This is a more robust way to prevent the analytics prompt.
+RUN npm install -g @angular/cli && ng config --global cli.analytics false
+
+# Copy the rest of your application code
+COPY . .
+
+# Expose the port your Angular app runs on
+EXPOSE 4201
+
+# Command to start your Angular application
+# Ensure your package.json has a "start" script, e.g., "ng serve --host 0.0.0.0 --port 4201"
+CMD ["npm", "run", "start"]

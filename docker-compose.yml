@@ -1,0 +1,25 @@
+# PROD
+# version: '3'
+# services:
+#   angular-frontend:
+#     build:
+#       context: .
+#       dockerfile: Dockerfile
+#     ports:
+#       - '4201:80'
+
+#DEV
+version: '3'
+services:
+  angular-frontend:
+    container_name: chat-widget-dev
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "4201:4201"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    stdin_open: true
+    tty: true

@@ -1,0 +1,12 @@
+<div class="app-container">
+  <ng-container *ngIf="_booleanIsAppInitialized; else loadingOrError">
+      <app-chat-widget></app-chat-widget>
+  </ng-container>
+
+  <ng-template #loadingOrError>
+    <div class="initialization-status">
+      <p *ngIf="!_stringErrorMessage">{{ _stringLoadingMessage }}</p>
+      <p *ngIf="_stringErrorMessage" class="error-message">{{ _stringErrorMessage }}</p>
+      </div>
+  </ng-template>
+</div>
